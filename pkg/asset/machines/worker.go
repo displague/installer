@@ -21,6 +21,8 @@ import (
 	vsphereproviderapi "github.com/openshift/machine-api-operator/pkg/apis/vsphereprovider"
 	vsphereprovider "github.com/openshift/machine-api-operator/pkg/apis/vsphereprovider/v1beta1"
 	mcfgv1 "github.com/openshift/machine-config-operator/pkg/apis/machineconfiguration.openshift.io/v1"
+	packetapi "github.com/packethost/cluster-api-provider-packet/pkg/apis"
+	packetprovider "github.com/packethost/cluster-api-provider-packet/pkg/apis/packetprovider/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -43,6 +45,7 @@ import (
 	"github.com/openshift/installer/pkg/asset/machines/machineconfig"
 	"github.com/openshift/installer/pkg/asset/machines/openstack"
 	"github.com/openshift/installer/pkg/asset/machines/ovirt"
+	"github.com/openshift/installer/pkg/asset/machines/packet"
 	"github.com/openshift/installer/pkg/asset/machines/vsphere"
 	"github.com/openshift/installer/pkg/asset/rhcos"
 	rhcosutils "github.com/openshift/installer/pkg/rhcos"
@@ -57,6 +60,7 @@ import (
 	nonetypes "github.com/openshift/installer/pkg/types/none"
 	openstacktypes "github.com/openshift/installer/pkg/types/openstack"
 	ovirttypes "github.com/openshift/installer/pkg/types/ovirt"
+	packettypes "github.com/openshift/installer/pkg/types/packet"
 	vspheretypes "github.com/openshift/installer/pkg/types/vsphere"
 )
 
@@ -128,6 +132,13 @@ func defaultOvirtMachinePoolPlatform() ovirttypes.MachinePool {
 			SizeGB: 120,
 		},
 		VMType: ovirttypes.VMTypeServer,
+	}
+}
+
+func defaultPacketMachinePoolPlatform() packettypes.MachinePool {
+	return packettypes.MachinePool{
+		// TODO(displague) what defaults should we supply?
+		Plan: "c3-medium.x86",
 	}
 }
 
@@ -389,6 +400,21 @@ func (w *Worker) Generate(dependencies asset.Parents) error {
 			for _, set := range sets {
 				machineSets = append(machineSets, set)
 			}
+		case packettypes.Name:
+			mpool := defaultPacketMachinePoolPlatform()
+			mpool.Set(ic.Platform.Packet.DefaultMachinePlatform)
+			mpool.Set(pool.Platform.Packet)
+			pool.Platform.Packet = &mpool
+
+			imageName, _ := rhcosutils.GenerateOpenStackImageName(string(*rhcosImage), clusterID.InfraID)
+
+			sets, err := packet.MachineSets(clusterID.InfraID, ic, &pool, imageName, "worker", "worker-user-data")
+			if err != nil {
+				return errors.Wrap(err, "failed to create worker machine objects for ovirt provider")
+			}
+			for _, set := range sets {
+				machineSets = append(machineSets, set)
+			}
 		case nonetypes.Name:
 		default:
 			return fmt.Errorf("invalid Platform")
@@ -472,6 +498,7 @@ func (w *Worker) MachineSets() ([]machineapi.MachineSet, error) {
 	libvirtapi.AddToScheme(scheme)
 	openstackapi.AddToScheme(scheme)
 	ovirtproviderapi.AddToScheme(scheme)
+	packetapi.AddToScheme(scheme)
 	vsphereproviderapi.AddToScheme(scheme)
 	decoder := serializer.NewCodecFactory(scheme).UniversalDecoder(
 		awsprovider.SchemeGroupVersion,
@@ -481,6 +508,7 @@ func (w *Worker) MachineSets() ([]machineapi.MachineSet, error) {
 		libvirtprovider.SchemeGroupVersion,
 		openstackprovider.SchemeGroupVersion,
 		ovirtprovider.SchemeGroupVersion,
+		packetprovider.SchemeGroupVersion,
 		vsphereprovider.SchemeGroupVersion,
 	)
 

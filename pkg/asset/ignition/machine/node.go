@@ -13,6 +13,7 @@ import (
 	baremetaltypes "github.com/openshift/installer/pkg/types/baremetal"
 	openstacktypes "github.com/openshift/installer/pkg/types/openstack"
 	ovirttypes "github.com/openshift/installer/pkg/types/ovirt"
+	packettypes "github.com/openshift/installer/pkg/types/packet"
 	vspheretypes "github.com/openshift/installer/pkg/types/vsphere"
 )
 
@@ -35,6 +36,12 @@ func pointerIgnitionConfig(installConfig *types.InstallConfig, rootCA []byte, ro
 	case vspheretypes.Name:
 		if installConfig.VSphere.APIVIP != "" {
 			ignitionHost = net.JoinHostPort(installConfig.VSphere.APIVIP, "22623")
+		}
+	case packettypes.Name:
+		// TODO(displague) Do I have to set platform = "packet" around here?
+		if installConfig.Packet.APIVIP != "" {
+			ignitionHost = net.JoinHostPort(installConfig.Packet.APIVIP, "22623")
+
 		}
 	}
 	return &igntypes.Config{
