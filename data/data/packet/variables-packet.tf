@@ -1,3 +1,4 @@
+/*
 variable "packet_cf_email" {
   description = "Your Cloudflare email address"
 }
@@ -9,18 +10,21 @@ variable "packet_cf_api_key" {
 variable "packet_cf_zone_id" {
   description = "Your Cloudflare Zone"
 }
-
+*/
 variable "packet_cluster_basedomain" {
   description = "Your Cloudflare Base domain for your cluster"
+  default = "TODO"
 }
 
 
 variable "packet_auth_token" {
   description = "Your Packet API key"
+  default = "TODO"
 }
 
 variable "packet_project_id" {
   description = "Your Packet Project ID"
+  default = "TODO"
 }
 
 variable "packet_ssh_private_key_path" {
@@ -85,6 +89,7 @@ variable "packet_ocp_version_zstream" {
 
 variable "packet_ocp_cluster_manager_token" {
   description = "OpenShift Cluster Manager API Token used to generate your pullSecret (https://cloud.redhat.com/openshift/token)"
+  default = "TODO"
 }
 
 variable "packet_ocp_storage_nfs_enable" {

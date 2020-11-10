@@ -1,3 +1,4 @@
+/*
 resource "cloudflare_record" "dns_a_cluster_api" {
   zone_id = var.cf_zone_id
   type    = "A"
@@ -55,3 +56,4 @@ resource "cloudflare_record" "dns_srv_etcd" {
   }
 
 }
+*/

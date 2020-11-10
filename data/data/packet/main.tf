@@ -2,18 +2,7 @@ provider "packet" {
   auth_token = var.packet_auth_token
 }
 
-terraform {
-  required_providers {
-    packet = "~> 3.0.1"
-  }
-}
-
-provider "cloudflare" {
-  email   = var.packet_cf_email
-  api_key = var.packet_cf_api_key
-}
-
-module "bastion" {
+module "bootstrap" {
 
   source               = "./bootstrap"
   // auth_token           = var.packet_auth_token
@@ -21,24 +10,26 @@ module "bastion" {
   //facility             = var.packet_facility
   // plan                 = var.packet_plan_master
   //operating_system     = var.bastion_operating_system
-  ssh_private_key_path = var.ssh_private_key_path
-  cluster_name         = var.cluster_name
-  cluster_basedomain   = var.cluster_basedomain
-  cf_zone_id           = var.cf_zone_id
-  ocp_version          = var.ocp_version
-  ocp_version_zstream  = var.ocp_version_zstream
+  ssh_private_key_path = var.packet_ssh_private_key_path
+  cluster_name         = var.packet_cluster_name
+  cluster_basedomain   = var.packet_cluster_basedomain
+  // cf_zone_id           = var.cf_zone_id
+  ocp_version          = var.packet_ocp_version
+  ocp_version_zstream  = var.packet_ocp_version_zstream
   //depends              = [module.prepare_openshift.finished]
 }
 
+/*
 module "dns_lb" {
   source = "./dns"
 
   cluster_name       = var.cluster_name
   cluster_basedomain = var.cluster_basedomain
-  cf_zone_id         = var.cf_zone_id
+ // cf_zone_id         = var.cf_zone_id
   node_type          = "lb"
   node_ips           = tolist([module.bastion.lb_ip])
 }
+*/
 /*
 module "prepare_openshift" {
 

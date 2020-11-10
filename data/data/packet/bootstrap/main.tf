@@ -9,6 +9,8 @@ locals {
   coreos_initrd  = "${local.coreos_filenm}-installer-initramfs.${local.arch}.img"
 }
 
+/*
+
 data "template_file" "user_data" {
   template = file("${path.module}/templates/user_data_${var.operating_system}.sh")
 }
@@ -38,6 +40,7 @@ data "template_file" "ignition_append" {
     cluster_basedomain = var.cluster_basedomain
   }
 }
+*/
 
 resource "packet_device" "lb" {
   hostname         = "lb-0.${var.cluster_name}.${var.cluster_basedomain}"
@@ -46,10 +49,11 @@ resource "packet_device" "lb" {
   operating_system = var.operating_system
   billing_cycle    = var.billing_cycle
   project_id       = var.project_id
-  user_data        = data.template_file.user_data.rendered
+  // user_data        = data.template_file.user_data.rendered
 
 }
 
+/*
 resource "null_resource" "dircheck" {
 
   provisioner "remote-exec" {
@@ -149,7 +153,10 @@ resource "null_resource" "ignition_append_files" {
   }
 }
 
+
 output "finished" {
   depends_on = [null_resource.file_uploads, null_resource.ipxe_files]
   value      = "Loadbalancer provisioning finished."
 }
+
+*/
